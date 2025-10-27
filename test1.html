@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>実力テスト 第1回 | 4-5_河川法</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            scroll-behavior: smooth;
+        }
+        /* 正解・不正解のスタイル */
+        .question-card.correct {
+            border-color: #10B981; /* green-500 */
+            background-color: #F0FDF4; /* green-50 */
+        }
+        .question-card.incorrect {
+            border-color: #EF4444; /* red-500 */
+            background-color: #FEF2F2; /* red-50 */
+        }
+        /* 採点後の正解選択肢ハイライト */
+        .correct-option {
+            background-color: #D1FAE5; /* green-100 */
+            border-color: #10B981; /* green-500 */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen p-6 md:p-10">
+
+    <div class="w-full max-w-4xl mx-auto">
+        <!-- ヘッダー -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-green-800">実力テスト 第1回 (河川の区分)</h1>
+            <p class="text-lg text-gray-600 mt-2">全20問。最後に「採点する」ボタンを押してください。</p>
+        </header>
+
+        <!-- スコア表示欄 -->
+        <div id="score-container" class="sticky top-0 z-10 mb-6 py-4 bg-white shadow-lg rounded-xl text-center text-3xl font-bold text-green-800 hidden">
+            <!-- スコアはここに表示されます -->
+        </div>
+
+        <!-- 問題リスト -->
+        <main id="test-container" class="space-y-6">
+            <!-- 問題はここに動的に挿入されます -->
+        </main>
+
+        <!-- 採点ボタンとナビゲーション -->
+        <footer id="footer-nav" class="mt-12 text-center">
+            <button id="score-button" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-10 rounded-lg shadow-xl text-2xl transition duration-300 transform hover:scale-105">
+                採点する
+            </button>
+            <a href="index.html" id="home-link" class="hidden inline-block bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 mt-4">
+                トップページに戻る
+            </a>
+        </footer>
+    </div>
+
+    <script>
+        // 実力テスト第1回データ
+        // 元データ（4択）から5問を記入式に変換しています (Q2, Q3, Q4, Q5, Q8)
+        const test1Questions = [
+            {
+                "questionNumber": 1,
+                "type": "multiple-choice",
+                "question": "河川の重要度に応じた「クラス分け」が存在する理由として、資料で挙げられているものはどれですか？",
+                "hint": "資料1ページの「河川の区分(クラス分け)について」の説明を思い出してください。",
+                "answerOptions": [
+                    { "text": "河川の利用料金を決定するため。", "isCorrect": false },
+                    { "text": "洪水が起きたときに、誰が責任をもって管理するかをはっきりさせるため。", "isCorrect": true },
+                    { "text": "河川の美観を評価するため。", "isCorrect": false },
+                    { "text": "漁業権の範囲を決定するため。", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 2,
+                "type": "fill-in",
+                "question": "1級河川の「指定者」は誰ですか？（役職名で回答）",
+                "hint": "国の「大動脈」のような存在です。国のトップが指定します。",
+                "keywords": ["国土交通大臣"]
+            },
+            {
+                "questionNumber": 3,
+                "type": "fill-in",
+                "question": "2級河川の「指定者」は誰ですか？（役職名で回答）",
+                "hint": "都道府県の「主要な道路」のような存在です。",
+                "keywords": ["都道府県知事"]
+            },
+            {
+                "questionNumber": 4,
+                "type": "fill-in",
+                "question": "準用河川の「指定者」は誰ですか？（役職名で回答）",
+                "hint": "地域にとって重要な小さな川です。",
+                "keywords": ["市町村長"]
+            },
+            {
+                "questionNumber": 5,
+                "type": "fill-in",
+                "question": "普通河川の管理の根拠となるものは何ですか？（河川法ではない）",
+                "hint": "市町村が独自のルールを作って管理します。",
+                "keywords": ["条例"]
+            },
+            {
+                "questionNumber": 6,
+                "type": "multiple-choice",
+                "question": "「1級河川」の定義として、最も適切なものはどれですか？",
+                "hint": "国の「大動脈」のような存在とイメージされています。",
+                "answerOptions": [
+                    { "text": "1つの都道府県内で完結している、比較的重要な河川。", "isCorrect": false },
+                    { "text": "市町村長が指定した、地域にとって重要な河川。", "isCorrect": false },
+                    { "text": "国土保全上又は国民経済上特に重要な水系に係る河川。", "isCorrect": true },
+                    { "text": "河川法が適用されない、小規模な水路。", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 7,
+                "type": "multiple-choice",
+                "question": "「2級河川」の定義として、最も適切なものはどれですか？",
+                "hint": "都道府県の「主要な道路」のような存在とイメージされています。",
+                "answerOptions": [
+                    { "text": "国土保全上特に重要な、複数の都府県にまたがる河川。", "isCorrect": false },
+                    { "text": "1級河川の次に重要な水系に係る河川で、都道府県知事が指定するもの。", "isCorrect": true },
+                    { "text": "市町村長が指定し、河川法の一部を準用する河川。", "isCorrect": false },
+                    { "text": "市町村が条例で管理する、河川法が適用されない河川。", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 8,
+                "type": "fill-in",
+                "question": "河川法に存在しない河川の区分は「何級」ですか？（数字のみでも可）",
+                "hint": "1級、2級...と数えていくと、存在しない番号があります。",
+                "keywords": ["3", "三級"]
+            },
+            {
+                "questionNumber": 9,
+                "type": "multiple-choice",
+                "question": "河川法上の「河川」とは、水が流れている部分（流水）と、何を合わせたものですか？",
+                "hint": "資料の演習問題①の選択肢②の解説を確認してください。",
+                "answerOptions": [
+                    { "text": "河川管理施設（ダム、堤防など）", "isCorrect": true },
+                    { "text": "河川敷の公園やグラウンド", "isCorrect": false },
+                    { "text": "河川の流域にある市街地全体", "isCorrect": false },
+                    { "text": "河川に生息する魚類や植物", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 10,
+                "type": "multiple-choice",
+                "question": "河川の法的な位置づけを示す「公共用物」とは、どういう意味ですか？",
+                "hint": "資料の演習問題①の選択肢④の解説に説明があります。[cite: 54-56]",
+                "answerOptions": [
+                    { "text": "国だけが使用できるもの", "isCorrect": false },
+                    { "text": "特定の個人の所有物であるもの", "isCorrect": false },
+                    { "text": "「みんなのもの」であり、社会みんなで利用する財産であること", "isCorrect": true },
+                    { "text": "売買することができないもの", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 11,
+                "type": "multiple-choice",
+                "question": "1級河川の管理は、原則として国が行いますが、状況によって管理を委任されることがあるのはどの機関ですか？",
+                "hint": "資料2ページや4ページの1級河川の管理者の説明を見てください。",
+                "answerOptions": [
+                    { "text": "市町村", "isCorrect": false },
+                    { "text": "都道府県", "isCorrect": true },
+                    { "text": "流域の民間企業", "isCorrect": false },
+                    { "text": "NPO・NGO", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 12,
+                "type": "multiple-choice",
+                "question": "複数の都府県にまたがる「利根川」や「淀川」は、どの区分に該当しますか？",
+                "hint": "資料1ページに例が記載されています。",
+                "answerOptions": [
+                    { "text": "1級河川", "isCorrect": true },
+                    { "text": "2級河川", "isCorrect": false },
+                    { "text": "準用河川", "isCorrect": false },
+                    { "text": "普通河川", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 13,
+                "type": "multiple-choice",
+                "question": "河川の「等級」「指定者」「管理者」の3点セットについて、誤った組み合わせはどれですか？",
+                "hint": "資料2ページの「ひと目でわかる! 川のクラス分け表」を注意深く見てください。",
+                "answerOptions": [
+                    { "text": "1級河川 - 国土交通大臣 - 国/都道府県", "isCorrect": false },
+                    { "text": "2級河川 - 都道府県知事 - 都道府県", "isCorrect": false },
+                    { "text": "準用河川 - 市町村長 - 市町村", "isCorrect": false },
+                    { "text": "2級河川 - 国土交通大臣 - 都道府県", "isCorrect": true }
+                ]
+            },
+            {
+                "questionNumber": 14,
+                "type": "multiple-choice",
+                "question": "資料4ページの表について、準用河川の「根拠法令」欄が空欄（//）になっています。本文の記述に基づくと、ここには何が入るのが最も適切ですか？",
+                "hint": "準用河川の「準用」とは、何の法律を準用するのかを考えてみましょう。",
+                "answerOptions": [
+                    { "text": "河川法", "isCorrect": true },
+                    { "text": "条例", "isCorrect": false },
+                    { "text": "法律の定めなし", "isCorrect": false },
+                    { "text": "市町村の規則", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 15,
+                "type": "multiple-choice",
+                "question": "資料1ページの演習問題の正解（誤っている選択肢）はどれですか？",
+                "hint": "資料3ページに、この問題の詳しい解説があります。[cite: 41-57]",
+                "answerOptions": [
+                    { "text": "① 2級河川は、市町村長が管理する", "isCorrect": true },
+                    { "text": "② 河川法上の河川には、ダム、堰、堤防等の河川管理施設も含まれる", "isCorrect": false },
+                    { "text": "③ 1級河川は、...国土交通大臣が指定した河川である", "isCorrect": false },
+                    { "text": "④ 河川は、公共用物である", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 16,
+                "type": "multiple-choice",
+                "question": "「1つの都道府県内で完結していることが多い」と説明されている河川区分はどれですか？",
+                "hint": "1級河川が「複数の都府県」にまたがるのと対比されています。",
+                "answerOptions": [
+                    { "text": "1級河川", "isCorrect": false },
+                    { "text": "2級河川", "isCorrect": true },
+                    { "text": "準用河川", "isCorrect": false },
+                    { "text": "普通河川", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 17,
+                "type": "multiple-choice",
+                "question": "河川のクラス分けで、重要度が高い順に並んでいるのはどれですか？",
+                "hint": "資料1ページで「重要な順に見ていきましょう」とある部分を参照してください。",
+                "answerOptions": [
+                    { "text": "1級 → 2級 → 準用 → 普通", "isCorrect": true },
+                    { "text": "1級 → 準用 → 2級 → 普通", "isCorrect": false },
+                    { "text": "準用 → 普通 → 1級 → 2級", "isCorrect": false },
+                    { "text": "普通 → 準用 → 2級 → 1級", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 18,
+                "type": "multiple-choice",
+                "question": "資料4ページの写真に写っている「酒匂川」の管理者は誰ですか？",
+                "hint": "写真の看板と、2級河川の管理者を組み合わせて考えてください。",
+                "answerOptions": [
+                    { "text": "国（国土交通大臣）", "isCorrect": false },
+                    { "text": "神奈川県", "isCorrect": true },
+                    { "text": "酒匂川が流れる市町村", "isCorrect": false },
+                    { "text": "指定されていない", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 19,
+                "type": "multiple-choice",
+                "question": "市町村長が「指定する」河川はどれですか？",
+                "hint": "クラス分け表の「指定する人」の欄を確認してください。",
+                "answerOptions": [
+                    { "text": "1級河川", "isCorrect": false },
+                    { "text": "2級河川", "isCorrect": false },
+                    { "text": "準用河川", "isCorrect": true },
+                    { "text": "普通河川", "isCorrect": false }
+                ]
+            },
+            {
+                "questionNumber": 20,
+                "type": "multiple-choice",
+                "question": "河川の区分に関する説明として、正しいものはどれですか？",
+                "hint": "4つのクラスそれぞれの「根拠法令」と「管理者」を思い出してください。",
+                "answerOptions": [
+                    { "text": "1級河川は、都道府県知事が指定する。", "isCorrect": false },
+                    { "text": "2級河川は、国が管理する。", "isCorrect": false },
+                    { "text": "準用河川は、河川法が適用されない。", "isCorrect": false },
+                    { "text": "普通河川は、市町村が条例で管理する。", "isCorrect": true }
+                ]
+            }
+        ];
+
+        // HTMLを生成してコンテナに挿入
+        const container = document.getElementById('test-container');
+        test1Questions.forEach((q, index) => {
+            const questionId = `q${index}`;
+            let contentHtml = '';
+
+            if (q.type === 'multiple-choice') {
+                contentHtml = `
+                    <div class="space-y-3" role="radiogroup" aria-labelledby="${questionId}-label">
+                        ${q.answerOptions.map((opt, i) => `
+                            <label for="${questionId}-opt${i}" class="option-label block w-full text-left p-4 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition duration-150 cursor-pointer">
+                                <input type="radio" name="${questionId}" id="${questionId}-opt${i}" value="${opt.text}" class="mr-3" data-correct="${opt.isCorrect}">
+                                ${opt.text}
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (q.type === 'fill-in') {
+                contentHtml = `
+                    <div>
+                        <input type="text" id="${questionId}-input" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="解答を入力してください">
+                        <div class="correct-answer-text hidden text-sm font-bold text-green-700 mt-2">
+                            正解キーワード: ${q.keywords.join('、 ')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const cardHtml = `
+                <div id="${questionId}" class="question-card bg-white shadow-lg rounded-xl overflow-hidden border-2 border-transparent">
+                    <!-- 問題ヘッダー -->
+                    <div class="p-6 bg-gray-50 border-b border-gray-200">
+                        <h2 id="${questionId}-label" class="text-xl font-bold text-green-900">
+                            <span class="text-2xl font-black mr-2">${index + 1}.</span>
+                            ${q.question}
+                        </h2>
+                        ${q.hint ? `<p class="text-sm text-gray-500 mt-2 ml-8">ヒント: ${q.hint}</p>` : ''}
+                    </div>
+                    
+                    <!-- 解答欄 -->
+                    <div class="p-6">
+                        ${contentHtml}
+                    </div>
+                </div>
+            `;
+            container.innerHTML += cardHtml;
+        });
+
+        // 採点機能
+        const scoreButton = document.getElementById('score-button');
+        scoreButton.addEventListener('click', () => {
+            let totalScore = 0;
+            const scoreContainer = document.getElementById('score-container');
+            
+            test1Questions.forEach((q, index) => {
+                const questionId = `q${index}`;
+                const card = document.getElementById(questionId);
+                let isCorrect = false;
+
+                if (q.type === 'multiple-choice') {
+                    const selected = container.querySelector(`input[name="${questionId}"]:checked`);
+                    if (selected) {
+                        if (selected.dataset.correct === 'true') {
+                            isCorrect = true;
+                        }
+                    }
+                    // 採点後に正解を表示
+                    q.answerOptions.forEach((opt, i) => {
+                        const label = container.querySelector(`label[for="${questionId}-opt${i}"]`);
+                        if (opt.isCorrect) {
+                            label.classList.add('correct-option');
+                        }
+                    });
+
+                } else if (q.type === 'fill-in') {
+                    const input = container.querySelector(`#${questionId}-input`);
+                    const userAnswer = input.value.trim();
+                    if (userAnswer) {
+                        // キーワードのいずれかを含んでいれば正解
+                        isCorrect = q.keywords.some(keyword => userAnswer.includes(keyword));
+                    }
+                    // 正解キーワードを表示
+                    container.querySelector(`#${questionId}-input + .correct-answer-text`).classList.remove('hidden');
+                    // 入力欄を無効化
+                    input.disabled = true;
+                }
+
+                // スコア加算とスタイル適用
+                if (isCorrect) {
+                    totalScore++;
+                    card.classList.add('correct');
+                } else {
+                    card.classList.add('incorrect');
+                }
+            });
+
+            // スコア表示
+            scoreContainer.innerHTML = `あなたのスコア: ${totalScore} / ${test1Questions.length} 点`;
+            scoreContainer.classList.remove('hidden');
+            window.scrollTo(0, 0);
+
+            // ボタンの表示切替
+            scoreButton.classList.add('hidden');
+            document.getElementById('home-link').classList.remove('hidden');
+
+            // すべてのラジオボタンを無効化
+            container.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = true);
+        });
+
+    </script>
+</body>
+</html>
