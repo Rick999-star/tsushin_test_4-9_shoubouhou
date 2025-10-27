@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>実力テスト 第1回 - 消防法令[4-9] 学習サイト</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Noto Sans JP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        /* 正解・不正解のスタイル */
+        .correct {
+            border-width: 2px;
+            border-color: #10B981; /* green-500 */
+        }
+        .incorrect {
+            border-width: 2px;
+            border-color: #EF4444; /* red-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-10">
+
+    <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-2xl">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center border-b pb-4">
+            実力テスト 第1回 (20問)
+        </h1>
+
+        <!-- スコア表示エリア -->
+        <div id="score-container" class="hidden mb-6 p-6 bg-blue-50 border border-blue-200 rounded-lg text-center">
+            <h2 id="score-text" class="text-2xl font-bold text-blue-700"></h2>
+        </div>
+
+        <!-- クイズフォーム -->
+        <form id="quiz-form" class="space-y-6">
+            <!-- 問題はここに動的に挿入されます -->
+        </form>
+
+        <!-- 採点ボタンとトップへのリンク -->
+        <div class="mt-10 text-center">
+            <button id="submit-btn"
+                    type="button"
+                    class="py-3 px-8 bg-green-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300 transform hover:-translate-y-1">
+                採点する
+            </button>
+            <a href="index.html"
+               id="home-link"
+               class="inline-block py-3 px-6 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transition duration-300 mt-4">
+                トップページに戻る
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 実力テスト 第1回データ (quiz_data.json の "test1" に相当)
+        const quizData = [
+            { "type": "multipleChoice", "question": "消防法（消防法施行令第7条）に基づく「消防用設備等」の3つの大きな分類に含まれないものはどれか。", "options": ["消防の用に供する設備", "消防用水", "消火活動上必要な施設", "特定防火対象物"], "answer": "特定防火対象物" },
+            { "type": "fillInTheBlank", "question": "「消防の用に供する設備」は、消火設備、( )設備、避難設備の3つに分類される。", "keywords": ["警報"], "acceptableAnswers": ["けいほう"] },
+            { "type": "multipleChoice", "question": "次のうち、「消火設備」に分類されないものはどれか。", "options": ["消火器", "屋内消火栓設備", "スプリンクラー設備", "自動火災報知設備"], "answer": "自動火災報知設備" },
+            { "type": "multipleChoice", "question": "次のうち、「警報設備」に分類されないものはどれか。", "options": ["ガス漏れ火災警報設備", "非常放送設備", "誘導灯", "漏電火災警報器"], "answer": "誘導灯" },
+            { "type": "multipleChoice", "question": "次のうち、「避難設備」に分類されないものはどれか。", "options": ["避難はしご", "救助袋", "誘導標識", "排煙設備"], "answer": "排煙設備" },
+            { "type": "fillInTheBlank", "question": "「消火活動上必要な施設」は、排煙設備、連結散水設備、連結送水管、非常コンセント設備、( )補助設備の5つである。", "keywords": ["無線通信"], "acceptableAnswers": ["むせんつうしん"] },
+            { "type": "multipleChoice", "question": "主に消防隊が消火活動のために使用する設備群の分類名はどれか。", "options": ["消防の用に供する設備", "消防用水", "消火活動上必要な施設", "警報設備"], "answer": "消火活動上必要な施設" },
+            { "type": "multipleChoice", "question": "「非常用の照明装置」の設置を義務付けている法律はどれか。", "options": ["消防法", "建築基準法", "電気事業法", "火災予防条例"], "answer": "建築基準法" },
+            { "type": "fillInTheBlank", "question": "高層ビル（7階建て以上など）に設置され、消防隊が地上から高層階へ迅速に送水できるようにする設備は「連結( )管」である。", "keywords": ["送水"], "acceptableAnswers": ["そうすい"] },
+            { "type": "fillInTheBlank", "question": "地下街や地下駐車場に設置され、消防隊が地上の送水口から送水して消火する設備は「連結( )設備」である。", "keywords": ["散水"], "acceptableAnswers": ["さんすい"] },
+            { "type": "multipleChoice", "question": "火災による停電時でも消防隊が専用の電源を確保できるように設置される、赤色のボックスで保護されていることが多い設備はどれか。", "options": ["非常コンセント設備", "無線通信補助設備", "漏電火災警報器", "火災通報装置"], "answer": "非常コンセント設備" },
+            { "type": "multipleChoice", "question": "火災時に煙を外部に排出し、視界を確保することで避難や消火活動を補助する設備はどれか。", "options": ["排煙設備", "連結散水設備", "不活性ガス消火設備", "水噴霧消火設備"], "answer": "排煙設備" },
+            { "type": "multipleChoice", "question": "消防用設備等の点検結果を消防署長などに報告する制度において、非常用発電機の「総合点検」の頻度（原則）はどれか。", "options": ["3か月に1回", "6か月に1回", "1年に1回", "3年に1回"], "answer": "1年に1回" },
+            { "type": "fillInTheBlank", "question": "非常用発電機の点検のうち、「( )点検」は6か月に1回実施される。", "keywords": ["機器"], "acceptableAnswers": ["きき"] },
+            { "type": "multipleChoice", "question": "消防設備点検資格者が資格を維持するために、受講が義務付けられている再講習の頻度はどれか。", "options": ["1年以内ごと", "3年以内ごと", "5年以内ごと", "7年以内ごと"], "answer": "5年以内ごと" },
+            { "type": "fillInTheBlank", "question": "消防用設備等の工事が完了した際、( )日以内に「消防用設備等設置届」を提出しなければならない。", "keywords": ["4"], "acceptableAnswers": ["四"] },
+            { "type": "fillInTheBlank", "question": "自動火災報知設備等の工事に着手する( )日前までに「工事整備対象設備等着工届出」を提出しなければならない。", "keywords": ["10"], "acceptableAnswers": ["十"] },
+            { "type": "multipleChoice", "question": "建物等の使用を開始する7日前までに提出が義務付けられている届出（火災予防条例に基づく）はどれか。", "options": ["防火対象物使用開始届", "消防用設備等設置届", "工事整備対象設備等着工届出", "電気設備設置届"], "answer": "防火対象物使用開始届" },
+            { "type": "multipleChoice", "question": "電話回線を使用して消防機関へ自動的に通報する設備はどれか。", "options": ["火災通報装置", "非常放送設備", "防災無線システム", "漏電火災警報器"], "answer": "火災通報装置" },
+            { "type": "multipleChoice", "question": "消防法上の「警報設備」に含まれないものはどれか。", "options": ["自動火災報知設備", "非常警報設備", "ガス漏れ火災警報設備", "防災無線システム"], "answer": "防災無線システム" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const quizForm = document.getElementById('quiz-form');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // 問題をフォームに動的に挿入
+            quizData.forEach((item, index) => {
+                const questionIndex = index + 1;
+                let contentHTML = `
+                    <div id="question-${index}" class="p-5 border border-gray-200 rounded-lg shadow-sm bg-white">
+                        <p class="text-lg font-semibold mb-4 text-gray-800">
+                            <span class="text-blue-600 font-bold">問 ${questionIndex}:</span> ${item.question.replace(/\( \)/g, '<span class="font-bold text-red-500">( ? )</span>')}
+                        </p>
+                `;
+
+                if (item.type === 'multipleChoice') {
+                    contentHTML += `<div class="space-y-3">`;
+                    item.options.forEach(option => {
+                        const optionId = `q${index}-${option.replace(/\s+/g, '-')}`;
+                        contentHTML += `
+                            <label for="${optionId}" class="block p-3 border rounded-lg hover:bg-gray-50 transition duration-200 cursor-pointer has-[:checked]:bg-blue-50 has-[:checked]:border-blue-300">
+                                <input type="radio" id="${optionId}" name="q${index}" value="${option}" class="mr-3">
+                                ${option}
+                            </label>
+                        `;
+                    });
+                    contentHTML += `</div>`;
+                } else if (item.type === 'fillInTheBlank') {
+                    contentHTML += `
+                        <input type="text" id="q${index}-input"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="解答を入力してください">
+                    `;
+                }
+                
+                // 正解表示用のエリア
+                contentHTML += `<div id="result-${index}" class="hidden mt-4 p-3 bg-gray-50 rounded-md"></div>`;
+                contentHTML += `</div>`;
+                quizForm.innerHTML += contentHTML;
+            });
+
+            // 採点ボタンのイベントリスナー
+            submitBtn.addEventListener('click', () => {
+                let score = 0;
+                
+                quizData.forEach((item, index) => {
+                    const questionDiv = document.getElementById(`question-${index}`);
+                    const resultDiv = document.getElementById(`result-${index}`);
+                    let isCorrect = false;
+                    let answerDisplay = '';
+
+                    if (item.type === 'multipleChoice') {
+                        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                        if (selected && selected.value === item.answer) {
+                            isCorrect = true;
+                        }
+                        answerDisplay = `<span class="font-semibold text-green-700">正解:</span> ${item.answer}`;
+                    } else if (item.type === 'fillInTheBlank') {
+                        const userInput = document.getElementById(`q${index}-input`).value.trim();
+                        if (userInput && item.keywords.some(keyword => userInput.includes(keyword))) {
+                            isCorrect = true;
+                        }
+                        answerDisplay = `<span class="font-semibold text-green-700">正解キーワード:</span> ${item.keywords.join(', ')}`;
+                    }
+
+                    // 正解・不正解のスタイル適用
+                    questionDiv.classList.remove('border-gray-200');
+                    if (isCorrect) {
+                        score++;
+                        questionDiv.classList.add('correct');
+                    } else {
+                        questionDiv.classList.add('incorrect');
+                    }
+
+                    // 正解の表示
+                    resultDiv.innerHTML = answerDisplay;
+                    resultDiv.classList.remove('hidden');
+                });
+
+                // スコアの表示
+                const scoreContainer = document.getElementById('score-container');
+                const scoreText = document.getElementById('score-text');
+                scoreText.textContent = `あなたのスコア: ${score} / ${quizData.length} 点`;
+                scoreContainer.classList.remove('hidden');
+
+                // 採点ボタンを非表示にし、トップへ戻るボタンを強調
+                submitBtn.style.display = 'none';
+                
+                // ページトップのスコア表示位置にスクロール
+                scoreContainer.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>

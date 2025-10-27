@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>練習問題 (30問) - 消防法令[4-9] 学習サイト</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Noto Sans JP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-10">
+
+    <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-2xl">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center border-b pb-4">
+            練習問題 (30問)
+        </h1>
+        
+        <!-- クイズコンテナ -->
+        <div id="quiz-container" class="space-y-6">
+            <!-- 問題はここに動的に挿入されます -->
+        </div>
+
+        <!-- トップページへの戻るリンク -->
+        <div class="mt-10 text-center">
+            <a href="index.html"
+               class="inline-block py-3 px-6 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transition duration-300">
+                トップページに戻る
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 練習問題データ (quiz_data.json の "practiceQuestions" に相当)
+        const quizData = [
+            { "type": "multipleChoice", "question": "消防法において、「消防用設備等」の大きな分類として、定められていないものはどれか。", "options": ["消防の用に供する設備", "消防用水", "消火活動上必要な施設", "防火管理上必要な施設"], "answer": "防火管理上必要な施設" },
+            { "type": "fillInTheBlank", "question": "火災の発見、初期消火、避難を目的とし、主に建物関係者が使用する設備群を「消防の( )する設備」という。", "keywords": ["用に供"], "acceptableAnswers": ["よういきょう", "ようにきょうする"] },
+            { "type": "multipleChoice", "question": "「消防の用に供する設備」の分類に含まれないものはどれか。", "options": ["消火設備", "警報設備", "避難設備", "排煙設備"], "answer": "排煙設備" },
+            { "type": "fillInTheBlank", "question": "火災時に消防隊が円滑に消火活動を行うために使用する施設を「( )上必要な施設」という。", "keywords": ["消火活動"], "acceptableAnswers": ["しょうかかつどう"] },
+            { "type": "multipleChoice", "question": "次のうち、「警報設備」に分類されるものはどれか。", "options": ["スプリンクラー設備", "誘導灯", "自動火災報知設備", "連結送水管"], "answer": "自動火災報知設備" },
+            { "type": "multipleChoice", "question": "次のうち、「避難設備」に分類されるものはどれか。", "options": ["消火器", "救助袋", "非常コンセント設備", "ガス漏れ火災警報設備"], "answer": "救助袋" },
+            { "type": "multipleChoice", "question": "次のうち、「消火活動上必要な施設」に分類されるものはどれか。", "options": ["屋内消火栓設備", "非常放送設備", "避難はしご", "無線通信補助設備"], "answer": "無線通信補助設備" },
+            { "type": "fillInTheBlank", "question": "「消防の用に供する設備」の3分類を覚えるための語呂合わせは、「用は( )・警・消」（ようは ひ・け・し）である。", "keywords": ["避"], "acceptableAnswers": ["ひ", "避難"] },
+            { "type": "multipleChoice", "question": "消防法ではなく、「建築基準法」によって設置が義務付けられている設備はどれか。", "options": ["誘導灯", "非常用の照明装置", "自動火災報知設備", "排煙設備"], "answer": "非常用の照明装置" },
+            { "type": "fillInTheBlank", "question": "サーバールームや電気室など、水損を防ぎたい場所に設置され、ガスで酸素濃度を低下させて消火する設備を「( )ガス消火設備」という。", "keywords": ["不活性"], "acceptableAnswers": ["ふかっせい"] },
+            { "type": "multipleChoice", "question": "高層ビルなどに設置され、消防隊が地上から上層階へ水を送るための設備はどれか。", "options": ["連結散水設備", "連結送水管", "スプリンクラー設備", "屋内消火栓設備"], "answer": "連結送水管" },
+            { "type": "multipleChoice", "question": "地下街や地下駐車場などに設置され、地上の送水口から消防ポンプ車が水を送り込むと、天井のヘッドから水が噴射される設備はどれか。", "options": ["連結散水設備", "連結送水管", "水噴霧消火設備", "屋外消火栓設備"], "answer": "連結散水設備" },
+            { "type": "fillInTheBlank", "question": "連結送水管において、消防隊が地上階でポンプ車を接続する部分を( )という。", "keywords": ["送水口"], "acceptableAnswers": ["そうすいこう"] },
+            { "type": "fillInTheBlank", "question": "連結送水管において、消防隊が各階でホースを接続し放水する部分を( )という。", "keywords": ["放水口"], "acceptableAnswers": ["ほうすいこう"] },
+            { "type": "multipleChoice", "question": "消防隊が使用する照明器具や破壊器具などの電源を、火災による停電時でも確保するための専用コンセント設備はどれか。", "options": ["非常コンセント設備", "非常用発電機", "漏電火災警報器", "無線通信補助設備"], "answer": "非常コンセント設備" },
+            { "type": "multipleChoice", "question": "地下街や高層ビル内部など、電波が届きにくい場所で消防隊の無線連絡を補助する設備はどれか。", "options": ["非常放送設備", "無線通信補助設備", "火災通報装置", "非常警報設備"], "answer": "無線通信補助設備" },
+            { "type": "fillInTheBlank", "question": "火災時に発生する煙を建物の外に排出し、避難経路や消防隊の活動空間の視界を確保する設備を( )設備という。", "keywords": ["排煙"], "acceptableAnswers": ["はいえん"] },
+            { "type": "multipleChoice", "question": "次のうち、「消火活動上必要な施設」として定められている5つの設備に含まれないものはどれか。", "options": ["排煙設備", "連結散水設備", "連結送水管", "スプリンクラー設備"], "answer": "スプリンクラー設備" },
+            { "type": "multipleChoice", "question": "緑色のライトで避難口や避難経路を示す、消防法上の「避難設備」はどれか。", "options": ["誘導灯", "非常用の照明装置", "誘導標識", "非常ベル"], "answer": "誘導灯" },
+            { "type": "multipleChoice", "question": "白色のライトで停電時に床面を照らす、建築基準法上の設備はどれか。", "options": ["誘導灯", "非常用の照明装置", "通路誘導標識", "非常コンセント設備"], "answer": "非常用の照明装置" },
+            { "type": "fillInTheBlank", "question": "手動または自動火災報知設備と連動し、電話回線を使用して消防機関へ通報・通話を行う装置を「( )装置」という。", "keywords": ["火災通報"], "acceptableAnswers": ["かさいつうほう"] },
+            { "type": "multipleChoice", "question": "火災通報装置の設置が義務付けられている防火対象物（延べ面積500m²以上）として、適切でないものはどれか。", "options": ["旅館・ホテル", "病院・助産所", "デイサービス", "大規模な工場"], "answer": "大規模な工場" },
+            { "type": "multipleChoice", "question": "非常用発電機の点検について、6か月に1回行う点検はどれか。", "options": ["機器点検", "総合点検", "法定点検", "予防的保全策"], "answer": "機器点検" },
+            { "type": "multipleChoice", "question": "非常用発電機の総合点検（負荷試験）の実施頻度として、原則とされているものはどれか。", "options": ["6か月に1回", "1年に1回", "2年に1回", "6年に1回"], "answer": "1年に1回" },
+            { "type": "fillInTheBlank", "question": "消防用設備等の点検は、消防設備士または消防設備( )資格者が行う。", "keywords": ["点検"], "acceptableAnswers": ["てんけん"] },
+            { "type": "fillInTheBlank", "question": "消防設備点検資格者は、免状の交付を受けた日以後における最初の4月1日から( )年以内ごとに再講習を受講しないと資格を喪失する。", "keywords": ["5"], "acceptableAnswers": ["五"] },
+            { "type": "multipleChoice", "question": "自動火災報知設備などの工事を開始する10日前までに消防長又は消防署長に提出する必要がある届出はどれか。", "options": ["工事整備対象設備等着工届出", "消防用設備等設置届", "防火対象物使用開始届", "電気設備設置届"], "answer": "工事整備対象設備等着工届出" },
+            { "type": "multipleChoice", "question": "消防用設備等の工事が完了した後、4日以内に提出する必要がある届出はどれか。", "options": ["工事整備対象設備等着工届出", "消防用設備等設置届", "防火対象物使用開始届", "火を使用する設備等の設置届"], "answer": "消防用設備等設置届" },
+            { "type": "multipleChoice", "question": "建物等の使用を開始する7日前までに提出する必要がある、火災予防条例に基づく届出はどれか。", "options": ["工事整備対象設備等着工届出", "消防用設備等設置届", "防火対象物使用開始届", "少量危険物の貯蔵・取扱届出"], "answer": "防火対象物使用開始届" },
+            { "type": "fillInTheBlank", "question": "災害時に行政から地域住民に情報を伝える行政通信システムであり、消防法上の警報設備には含まれないものを「( )無線システム」という。", "keywords": ["防災"], "acceptableAnswers": ["ぼうさい"] }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const quizContainer = document.getElementById('quiz-container');
+
+            quizData.forEach((item, index) => {
+                const questionIndex = index + 1;
+                const answerId = `answer-${index}`;
+                
+                let contentHTML = `
+                    <div class="p-5 border border-gray-200 rounded-lg shadow-sm bg-white">
+                        <p class="text-lg font-semibold mb-4 text-gray-800">
+                            <span class="text-blue-600 font-bold">問 ${questionIndex}:</span> ${item.question.replace(/\( \)/g, '<span class="font-bold text-red-500">( ? )</span>')}
+                        </p>
+                `;
+
+                // 4択問題の場合
+                if (item.type === 'multipleChoice') {
+                    contentHTML += `<div class="space-y-2 mb-4">`;
+                    item.options.forEach(option => {
+                        contentHTML += `
+                            <div class_alias="block p-3 border rounded-lg bg-gray-50 text-gray-700">
+                                ${option}
+                            </div>
+                        `;
+                    });
+                    contentHTML += `</div>`;
+                }
+
+                // 穴埋め問題の場合
+                if (item.type === 'fillInTheBlank') {
+                    contentHTML += `<p class="text-sm text-gray-500 mb-4 italic">（穴埋め問題）</p>`;
+                }
+
+                // 解答・解説エリア
+                let answerHTML = '';
+                if (item.type === 'multipleChoice') {
+                    answerHTML = `<p><span class="font-semibold text-green-700">正解:</span> ${item.answer}</p>`;
+                } else if (item.type === 'fillInTheBlank') {
+                    answerHTML = `<p><span class="font-semibold text-green-700">正解キーワード:</span> ${item.keywords.join(', ')}</p>`;
+                }
+
+                contentHTML += `
+                    <button class="toggle-answer-btn py-2 px-4 bg-blue-500 text-white text-sm font-semibold rounded-md hover:bg-blue-600 transition duration-200"
+                            data-target="${answerId}">
+                        解答・解説を表示
+                    </button>
+                    <div id="${answerId}" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                        ${answerHTML}
+                    </div>
+                </div>
+                `;
+                
+                quizContainer.innerHTML += contentHTML;
+            });
+
+            // ボタンのイベントリスナーを設定
+            document.querySelectorAll('.toggle-answer-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-target');
+                    const answerDiv = document.getElementById(targetId);
+                    
+                    if (answerDiv.classList.contains('hidden')) {
+                        answerDiv.classList.remove('hidden');
+                        button.textContent = '解答・解説を隠す';
+                        button.classList.replace('bg-blue-500', 'bg-gray-500');
+                        button.classList.replace('hover:bg-blue-600', 'hover:bg-gray-600');
+                    } else {
+                        answerDiv.classList.add('hidden');
+                        button.textContent = '解答・解説を表示';
+                        button.classList.replace('bg-gray-500', 'bg-blue-500');
+                        button.classList.replace('hover:bg-gray-600', 'hover:bg-blue-600');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
